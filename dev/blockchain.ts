@@ -34,6 +34,20 @@ export class Blockchain {
         return this.chain[this.chain.length - 1];
     }
 
+    createNewTransaction(amount: number, sender: string, recipient: string): void {
+        const newTransaction: Transaction = {
+            amount: amount,
+            sender: sender,
+            recipient: recipient
+        }
+
+        this.addNewTransaction(newTransaction);
+    }
+
+    private addNewTransaction(transaction: Transaction): void {
+        this.newTransactions.push(transaction);
+    }
+
     private addBlockToChain(block: Block): void {
         this.chain.push(block);
     }
