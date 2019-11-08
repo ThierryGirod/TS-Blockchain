@@ -52,9 +52,14 @@ export class Blockchain {
         return this.getLastBlock().index + 1;
     }
 
+    getPendingTransactions(): Transaction[] {
+        return this.newTransactions;
+    }
+
     private addNewTransaction(transaction: Transaction): void {
         this.newTransactions.push(transaction);
     }
+
 
     private addBlockToChain(block: Block): void {
         this.chain.push(block);
