@@ -40,7 +40,7 @@ export class Blockchain {
         return this.chain[this.chain.length - 1];
     }
 
-    createNewTransaction(amount: number, sender: string, recipient: string): void {
+    createNewTransaction(amount: number, sender: string, recipient: string): number {
         const newTransaction: Transaction = {
             amount: amount,
             sender: sender,
@@ -48,6 +48,8 @@ export class Blockchain {
         }
 
         this.addNewTransaction(newTransaction);
+
+        return this.getLastBlock().index + 1;
     }
 
     private addNewTransaction(transaction: Transaction): void {
