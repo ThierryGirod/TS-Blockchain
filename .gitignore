@@ -1,2 +1,5 @@
 # Ignore all compiled files
 *.js
+
+# Ignore node modules
+node_modules/
