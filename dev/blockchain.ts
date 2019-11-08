@@ -56,4 +56,8 @@ export class Blockchain {
         this.newTransactions = [];
     }
 
+    private getChain(): Block[] {
+        return this.chain;
+    }
+
 }
