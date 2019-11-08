@@ -1,5 +1,6 @@
 import { Transaction } from "./transaction";
 import { Block } from "./block";
+import * as sha256 from "sha256";
 
 export class Blockchain {
 
@@ -58,6 +59,12 @@ export class Blockchain {
 
     getChain(): Block[] {
         return this.chain;
+    }
+
+    hashBlock(previousBlockHash: string, currentBlockData: Transaction[], nonce: number) {
+        const dataAsString: string = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+        const hash = sha256(dataAsString);
+        return hash;
     }
 
 }
