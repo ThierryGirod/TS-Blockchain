@@ -61,10 +61,20 @@ export class Blockchain {
         return this.chain;
     }
 
-    hashBlock(previousBlockHash: string, currentBlockData: Transaction[], nonce: number) {
+    hashBlock(previousBlockHash: string, currentBlockData: Transaction[], nonce: number): string {
         const dataAsString: string = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
         const hash = sha256(dataAsString);
         return hash;
+    }
+
+    proofOfWork(previousBlockHash: string, currentBlockData: Transaction[]): number {
+        let nonce = 0;
+        let hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+        while (hash.substr(0, 4) !== '0000') {
+            nonce = nonce + 1;
+            hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+        }
+        return nonce;
     }
 
 }
