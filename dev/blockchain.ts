@@ -30,6 +30,10 @@ export class Blockchain {
         return newBlock;
     }
 
+    getLastBlock(): Block {
+        return this.chain[this.chain.length - 1];
+    }
+
     private addBlockToChain(block: Block): void {
         this.chain.push(block);
     }
