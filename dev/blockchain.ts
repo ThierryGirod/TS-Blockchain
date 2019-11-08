@@ -10,6 +10,11 @@ export class Blockchain {
     constructor() {
         this.chain = [];
         this.newTransactions = [];
+        this.createGenesisBlock();
+    }
+
+    private createGenesisBlock(){
+        this.createNewBlock(0,'0','0');
     }
 
     createNewBlock(nonce: number,
