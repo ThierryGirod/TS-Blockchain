@@ -4,17 +4,23 @@ import bodyParser = require('body-parser');
 import uuid = require('uuid');
 
 const app = express();
+const nodeAddress = uuid().split('-').join('');
+const bitcoin = new Blockchain();
+const port = process.argv[2];
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }))
 
-const bitcoin = new Blockchain();
-
-
-
 
 /**API Endpoints */
+app.get('/', function(req, res) {
+    res.json({
+        note: "Hallo Blockchain"
+    });
+});
+
 app.get('/blockchain', function(req, res) {
-    res.send(bitcoin)
+    res.send(bitcoin);
 });
 
 app.post('/transaction', function(req, res) {
@@ -37,10 +43,9 @@ app.get('/mine', function(req, res) {
         block: newBlock
     });
 
-    const nodeAddress = uuid().split('-').join('');
     bitcoin.createNewTransaction(12.5,'reward',nodeAddress)
 });
 
-app.listen(3000, function() {
-    console.log('listening on port 3000');
+app.listen(port, function() {
+    console.log(`listening on port ${port}`);
 });
