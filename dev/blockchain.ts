@@ -6,15 +6,17 @@ export class Blockchain {
 
     private chain: Block[];
     private newTransactions: Transaction[];
+    private currentNodeUrl: string;
 
     constructor() {
         this.chain = [];
         this.newTransactions = [];
+        this.currentNodeUrl = process.argv[3];
         this.createGenesisBlock();
     }
 
-    private createGenesisBlock(){
-        this.createNewBlock(0,'0','0');
+    private createGenesisBlock() {
+        this.createNewBlock(0, '0', '0');
     }
 
     createNewBlock(nonce: number,
@@ -87,6 +89,10 @@ export class Blockchain {
             hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
         }
         return nonce;
+    }
+
+    getCurrentNodeUrl(): string {
+        return this.currentNodeUrl;
     }
 
 }
