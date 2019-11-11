@@ -5,12 +5,12 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "node_1": "nodemon --watch dev -e js dev/api/networkNode.js 3000 https://3000-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io",
-    "node_2": "nodemon --watch dev -e js dev/api/networkNode.js 3001 https://3001-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io",
-    "node_3": "nodemon --watch dev -e js dev/api/networkNode.js 3002 https://3002-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io",
-    "node_4": "nodemon --watch dev -e js dev/api/networkNode.js 3003 https://3003-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io",
-    "node_5": "nodemon --watch dev -e js dev/api/networkNode.js 3004 https://3004-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io",
-    "node_6": "nodemon --watch dev -e js dev/api/networkNode.js 3005 https://3005-bad5acb8-5017-434c-95c9-0af6b24fe2fa.ws-eu01.gitpod.io"
+    "node_1": "nodemon --watch dev -e js dev/api/networkNode.js 3000 http://localhost:3000",
+    "node_2": "nodemon --watch dev -e js dev/api/networkNode.js 3001 http://localhost:3001",
+    "node_3": "nodemon --watch dev -e js dev/api/networkNode.js 3002 http://localhost:3002",
+    "node_4": "nodemon --watch dev -e js dev/api/networkNode.js 3003 http://localhost:3003",
+    "node_5": "nodemon --watch dev -e js dev/api/networkNode.js 3004 http://localhost:3004",
+    "node_6": "nodemon --watch dev -e js dev/api/networkNode.js 3005 http://localhost:3005"
   },
   "repository": {
     "type": "git",
