@@ -97,6 +97,16 @@ app.post('/register-node', function(req, res) {
     });
 });
 
+app.post('/register-nodes-bulk', function(req, res) {
+    const allNetworkNodes = req.body.allNetworkNodes;
+    allNetworkNodes.forEach(networkNodeUrl => {
+        girodcoin.addNewNetworkNode(networkNodeUrl);
+    });
+    res.json({
+        note: 'Bulk registration successfull.'
+    });
+});
+
 /** Start App */
 app.listen(port, function() {
     console.log(`listening on port ${port}`);
