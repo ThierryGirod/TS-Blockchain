@@ -7,11 +7,13 @@ export class Blockchain {
     private chain: Block[];
     private newTransactions: Transaction[];
     private currentNodeUrl: string;
+    private networkNodes: string[];
 
     constructor() {
         this.chain = [];
         this.newTransactions = [];
         this.currentNodeUrl = process.argv[3];
+        this.networkNodes = [];
         this.createGenesisBlock();
     }
 
@@ -93,6 +95,17 @@ export class Blockchain {
 
     getCurrentNodeUrl(): string {
         return this.currentNodeUrl;
+    }
+
+    getNetworkNodeUrls(): string[]{
+        return this.networkNodes;
+    }
+
+    addNewNetworkNode(url: string) {
+        if(this.networkNodes.indexOf(url) == -1) {
+            this.networkNodes.push(url);
+        }
+
     }
 
 }

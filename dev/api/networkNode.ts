@@ -2,6 +2,7 @@ import { Blockchain } from "../blockchain";
 import express = require('express');
 import bodyParser = require('body-parser');
 import uuid = require('uuid');
+import rp = require('request-promise');
 
 const app = express();
 const nodeAddress = uuid().split('-').join('');
@@ -12,7 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }))
 
 
-/**API Endpoints */
+/** Blockchain Access API Endpoints */
 app.get('/', function(req, res) {
     const currentNodeUrl = girodcoin.getCurrentNodeUrl();
     res.json({
@@ -44,7 +45,28 @@ app.get('/mine', function(req, res) {
         block: newBlock
     });
 
-    girodcoin.createNewTransaction(12.5,'reward',nodeAddress)
+    girodcoin.createNewTransaction(12.5, 'reward', nodeAddress)
+});
+
+/** Networking API Endpoints*/
+app.post('register-and-broadcast-node', function(req, res) {
+    /** register */
+    const newNodeUrl = req.body.newNodeUrl;
+    girodcoin.addNewNetworkNode(newNodeUrl);
+
+    /** broadcast */
+    girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: newNodeUrl + '/register-node',
+            method: 'POST',
+            body: {
+                newNodeUrl: networkNodeUrl
+            },
+            json: true
+        }
+
+        rp(requestOptions);
+    });
 });
 
 app.listen(port, function() {
