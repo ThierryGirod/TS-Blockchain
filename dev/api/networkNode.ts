@@ -58,10 +58,10 @@ app.post('/register-and-broadcast-node', function(req, res) {
     const regNodePromises = [];
     girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
         const requestOptions = {
-            uri: newNodeUrl + '/register-node',
+            uri: networkNodeUrl + '/register-node',
             method: 'POST',
             body: {
-                newNodeUrl: networkNodeUrl
+                newNodeUrl: newNodeUrl
             },
             json: true
         }
@@ -70,7 +70,6 @@ app.post('/register-and-broadcast-node', function(req, res) {
     });
 
     Promise.all(regNodePromises).then(data => {
-        console.log(data);
         const bulkRegisterOptions = {
             uri: newNodeUrl + '/register-nodes-bulk',
             method: 'POST',
