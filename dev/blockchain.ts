@@ -103,8 +103,9 @@ export class Blockchain {
 
     addNewNetworkNode(url: string) {
         if (this.networkNodes.indexOf(url) == -1
-            && (this.getCurrentNodeUrl() !== url)) {
+            && (this.getCurrentNodeUrl().localeCompare(url) !== 0)) {
             this.networkNodes.push(url);
+
         }
 
     }
