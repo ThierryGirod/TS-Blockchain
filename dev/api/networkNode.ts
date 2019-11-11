@@ -49,12 +49,13 @@ app.get('/mine', function(req, res) {
 });
 
 /** Networking API Endpoints*/
-app.post('register-and-broadcast-node', function(req, res) {
+app.post('/register-and-broadcast-node', function(req, res) {
     /** register */
     const newNodeUrl = req.body.newNodeUrl;
     girodcoin.addNewNetworkNode(newNodeUrl);
 
     /** broadcast */
+    const regNodePromises = [];
     girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
         const requestOptions = {
             uri: newNodeUrl + '/register-node',
@@ -65,10 +66,38 @@ app.post('register-and-broadcast-node', function(req, res) {
             json: true
         }
 
-        rp(requestOptions);
+        regNodePromises.push(rp(requestOptions));
+    });
+
+    Promise.all(regNodePromises).then(data => {
+        console.log(data);
+        const bulkRegisterOptions = {
+            uri: newNodeUrl + '/register-nodes-bulk',
+            method: 'POST',
+            body: {
+                allNetworkNodes: [
+                    ...girodcoin.getNetworkNodeUrls(),
+                    girodcoin.getCurrentNodeUrl()
+                ]
+            },
+            json: true
+        }
+        return rp(bulkRegisterOptions);
+    })
+        .then(data => {
+            res.json({ note: 'New node registered with network successfully.' });
+        });
+});
+
+app.post('/register-node', function(req, res) {
+    const newNodeUrl = req.body.newNodeUrl;
+    girodcoin.addNewNetworkNode(newNodeUrl);
+    res.json({
+        note: "New node registered successuflly!",
     });
 });
 
+/** Start App */
 app.listen(port, function() {
     console.log(`listening on port ${port}`);
 });

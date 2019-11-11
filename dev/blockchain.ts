@@ -97,12 +97,13 @@ export class Blockchain {
         return this.currentNodeUrl;
     }
 
-    getNetworkNodeUrls(): string[]{
+    getNetworkNodeUrls(): string[] {
         return this.networkNodes;
     }
 
     addNewNetworkNode(url: string) {
-        if(this.networkNodes.indexOf(url) == -1) {
+        if (this.networkNodes.indexOf(url) == -1
+            && (this.getCurrentNodeUrl() !== url)) {
             this.networkNodes.push(url);
         }
 
