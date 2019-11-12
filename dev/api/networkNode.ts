@@ -4,6 +4,7 @@ import bodyParser = require('body-parser');
 import uuid = require('uuid');
 import rp = require('request-promise');
 import { Block } from "../block";
+import { request } from "http";
 
 const app = express();
 const nodeAddress = uuid().split('-').join('');
@@ -107,12 +108,12 @@ app.post('/receive-new-block', function (req, res) {
 
     if (lastBlock.hash === newBlock.previousBlockHash &&
         lastBlock.index + 1 === newBlock.index) {
-            girodcoin.addBlockToChain(newBlock);
-            girodcoin.deletePendingTransactions();
-            res.json({
-                note: 'New block received and accepted.',
-                newBlock: newBlock
-            });
+        girodcoin.addBlockToChain(newBlock);
+        girodcoin.deletePendingTransactions();
+        res.json({
+            note: 'New block received and accepted.',
+            newBlock: newBlock
+        });
     } else {
         res.json({
             note: 'New block rejected.',
@@ -177,6 +178,54 @@ app.post('/register-nodes-bulk', function (req, res) {
     res.json({
         note: 'Bulk registration successfull.'
     });
+});
+
+/** Consensus Endpoint */
+app.get('/consensus', function (req, res) {
+    const requestPromises = [];
+    girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/blockchain',
+            method: 'GET',
+            json: true
+        }
+
+        requestPromises.push(rp(requestOptions));
+    });
+
+    Promise.all(requestPromises)
+        .then(blockchains => {
+            const currentChainLength = girodcoin.getChain().length;
+            let maxChainLength = currentChainLength;
+            let longestChain = girodcoin.getChain();
+            let newPendingTransactions = girodcoin.getPendingTransactions();
+
+            blockchains.forEach(blockchain => {
+                
+                if (blockchain.chain.length > maxChainLength) {
+                    maxChainLength = blockchain.chain.length;
+                    longestChain = blockchain.chain;
+                    newPendingTransactions = blockchain.newTransactions;
+                }
+            });
+
+            if (longestChain == girodcoin.getChain() || (longestChain && !girodcoin.chainIsValid(longestChain))) {
+                res.json({
+                    note: 'Current chain has not been replaced.',
+                    chain: girodcoin.getChain()
+                });
+            }
+            else {
+                girodcoin.setChain(longestChain);
+                girodcoin.setPendingTransactions(newPendingTransactions);
+                res.json({
+                    note: 'This chain has been replaced.',
+                    chain: girodcoin.getChain()
+                });
+            }
+
+        });
+
 });
 
 /** Start App */

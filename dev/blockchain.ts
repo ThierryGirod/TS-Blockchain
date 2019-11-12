@@ -21,8 +21,8 @@ export class Blockchain {
     private createGenesisBlock() {
         let previousHash = '0';
         let nonce = 0;
-        let hash = this.hashBlock(previousHash, this.getPendingTransactions(), nonce);
-        this.createNewBlock(nonce,previousHash,hash);
+        let hash = '0';
+        this.createNewBlock(nonce, previousHash, hash);
     }
 
     createNewBlock(nonce: number,
@@ -78,6 +78,10 @@ export class Blockchain {
         this.newTransactions = [];
     }
 
+    setPendingTransactions(transactions: Transaction[]): void {
+        this.newTransactions = transactions;
+    }
+
     addBlockToChain(block: Block): void {
         this.chain.push(block);
     }
@@ -88,6 +92,10 @@ export class Blockchain {
 
     getChain(): Block[] {
         return this.chain;
+    }
+
+    setChain(chain: Block[]): void {
+        this.chain = chain;
     }
 
     hashBlock(previousBlockHash: string, currentBlockData: Transaction[], nonce: number): string {
@@ -121,6 +129,42 @@ export class Blockchain {
 
         }
 
+    }
+
+    chainIsValid(blockchain: Block[]): boolean {
+        for (let i = 1; i < blockchain.length; i++) {
+            const currentBlock = blockchain[i];
+            const previousBlock = blockchain[i - 1];
+            const blockHash = this.hashBlock(previousBlock.hash, currentBlock.transactions, currentBlock.nonce);
+
+            if (currentBlock.previousBlockHash !== previousBlock.hash) {
+                return false;
+            }
+
+            if (blockHash.substring(0, 4) !== '0000') {
+                return false;
+            }
+
+        }
+
+        const genesisBlock = blockchain[0];
+        if (genesisBlock.nonce !== 0) {
+            return false;
+        }
+
+        if (genesisBlock.previousBlockHash !== '0') {
+            return false;
+        }
+
+        if (genesisBlock.hash !== '0') {
+            return false;
+        }
+
+        if(genesisBlock.transactions.length !== 0) {
+            return false;
+        }
+        
+        return true;
     }
 
 }
