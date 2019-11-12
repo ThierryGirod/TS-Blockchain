@@ -1,6 +1,7 @@
 import { Transaction } from "./transaction";
 import { Block } from "./block";
-import * as sha256 from "sha256";
+import * as sha256 from "sha256"
+import uuid = require('uuid');;
 
 export class Blockchain {
 
@@ -18,7 +19,10 @@ export class Blockchain {
     }
 
     private createGenesisBlock() {
-        this.createNewBlock(0, '0', '0');
+        let previousHash = '0';
+        let nonce = 0;
+        let hash = this.hashBlock(previousHash, this.getPendingTransactions(), nonce);
+        this.createNewBlock(nonce,previousHash,hash);
     }
 
     createNewBlock(nonce: number,
@@ -44,14 +48,20 @@ export class Blockchain {
         return this.chain[this.chain.length - 1];
     }
 
-    createNewTransaction(amount: number, sender: string, recipient: string): number {
+    createNewTransaction(amount: number, sender: string, recipient: string): Transaction {
+        const transactionId: string = uuid().split('-').join('');
         const newTransaction: Transaction = {
             amount: amount,
             sender: sender,
-            recipient: recipient
+            recipient: recipient,
+            transactionId: transactionId
         }
 
-        this.addNewTransaction(newTransaction);
+        return newTransaction;
+    }
+
+    addNewPendingTransaction(transaction: Transaction): number {
+        this.addNewTransaction(transaction);
 
         return this.getLastBlock().index + 1;
     }
@@ -64,8 +74,11 @@ export class Blockchain {
         this.newTransactions.push(transaction);
     }
 
+    deletePendingTransactions(): void {
+        this.newTransactions = [];
+    }
 
-    private addBlockToChain(block: Block): void {
+    addBlockToChain(block: Block): void {
         this.chain.push(block);
     }
 

@@ -3,6 +3,7 @@ import express = require('express');
 import bodyParser = require('body-parser');
 import uuid = require('uuid');
 import rp = require('request-promise');
+import { Block } from "../block";
 
 const app = express();
 const nodeAddress = uuid().split('-').join('');
@@ -14,25 +15,48 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 
 /** Blockchain Access API Endpoints */
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     const currentNodeUrl = girodcoin.getCurrentNodeUrl();
     res.json({
         note: `Hallo ${currentNodeUrl}`
     });
 });
 
-app.get('/blockchain', function(req, res) {
+app.get('/blockchain', function (req, res) {
     res.send(girodcoin);
 });
 
-app.post('/transaction', function(req, res) {
-    const blockIndex = girodcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+app.post('/transaction', function (req, res) {
+    const newTransaction = req.body;
+    const blockIndex = girodcoin.addNewPendingTransaction(newTransaction);
     res.json({
         note: `Transaction will be added in block ${blockIndex}.`
     });
 });
 
-app.get('/mine', function(req, res) {
+app.post('/transaction/broadcast', function (req, res) {
+    const newTransaction = girodcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+    girodcoin.addNewPendingTransaction(newTransaction);
+
+    const requestPromises = [];
+    girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/transaction',
+            method: 'POST',
+            body: newTransaction,
+            json: true
+        }
+
+        requestPromises.push(rp(requestOptions));
+    });
+
+    Promise.all(requestPromises)
+        .then(data => {
+            res.json({ note: 'Transaction created and broadcast successfully.' });
+        });
+});
+
+app.get('/mine', function (req, res) {
 
     const lastBlock = girodcoin.getLastBlock();
     const previousBlockHash = lastBlock.hash;
@@ -40,16 +64,65 @@ app.get('/mine', function(req, res) {
     const blockHash = girodcoin.hashBlock(previousBlockHash, girodcoin.getPendingTransactions(), nonce);
     const newBlock = girodcoin.createNewBlock(nonce, previousBlockHash, blockHash);
 
-    res.json({
-        note: "New block mined successuflly!",
-        block: newBlock
+    const requestPromises = [];
+    girodcoin.getNetworkNodeUrls().forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/receive-new-block',
+            method: 'POST',
+            body: {
+                newBlock: newBlock
+            },
+            json: true
+        }
+
+        requestPromises.push(rp(requestOptions));
     });
 
-    girodcoin.createNewTransaction(12.5, 'reward', nodeAddress)
+    Promise.all(requestPromises)
+        .then(data => {
+            const requestOptions = {
+                uri: girodcoin.getCurrentNodeUrl() + '/transaction/broadcast',
+                method: 'POST',
+                body: {
+                    "amount": 12.5,
+                    "sender": "reward",
+                    "recipient": nodeAddress
+                },
+                json: true
+            }
+
+            return rp(requestOptions);
+        })
+        .then(data => {
+            res.json({
+                note: "New block mined successfully!",
+                block: newBlock
+            });
+        });
+});
+
+app.post('/receive-new-block', function (req, res) {
+    const newBlock: Block = req.body.newBlock;
+    const lastBlock = girodcoin.getLastBlock();
+
+    if (lastBlock.hash === newBlock.previousBlockHash &&
+        lastBlock.index + 1 === newBlock.index) {
+            girodcoin.addBlockToChain(newBlock);
+            girodcoin.deletePendingTransactions();
+            res.json({
+                note: 'New block received and accepted.',
+                newBlock: newBlock
+            });
+    } else {
+        res.json({
+            note: 'New block rejected.',
+            newBlock: newBlock
+        });
+    }
 });
 
 /** Networking API Endpoints*/
-app.post('/register-and-broadcast-node', function(req, res) {
+app.post('/register-and-broadcast-node', function (req, res) {
     /** register */
     const newNodeUrl = req.body.newNodeUrl;
     girodcoin.addNewNetworkNode(newNodeUrl);
@@ -88,7 +161,7 @@ app.post('/register-and-broadcast-node', function(req, res) {
         });
 });
 
-app.post('/register-node', function(req, res) {
+app.post('/register-node', function (req, res) {
     const newNodeUrl = req.body.newNodeUrl;
     girodcoin.addNewNetworkNode(newNodeUrl);
     res.json({
@@ -96,7 +169,7 @@ app.post('/register-node', function(req, res) {
     });
 });
 
-app.post('/register-nodes-bulk', function(req, res) {
+app.post('/register-nodes-bulk', function (req, res) {
     const allNetworkNodes = req.body.allNetworkNodes;
     allNetworkNodes.forEach(networkNodeUrl => {
         girodcoin.addNewNetworkNode(networkNodeUrl);
@@ -107,6 +180,6 @@ app.post('/register-nodes-bulk', function(req, res) {
 });
 
 /** Start App */
-app.listen(port, function() {
+app.listen(port, function () {
     console.log(`listening on port ${port}`);
 });
