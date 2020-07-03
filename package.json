@@ -10,7 +10,8 @@
     "node_3": "nodemon --watch dev -e js dev/api/networkNode.js 3002 http://localhost:3002",
     "node_4": "nodemon --watch dev -e js dev/api/networkNode.js 3003 http://localhost:3003",
     "node_5": "nodemon --watch dev -e js dev/api/networkNode.js 3004 http://localhost:3004",
-    "node_6": "nodemon --watch dev -e js dev/api/networkNode.js 3005 http://localhost:3005"
+    "node_6": "nodemon --watch dev -e js dev/api/networkNode.js 3005 http://localhost:3005",
+    "start_all": "npm run node_1 && npm run node_2 && npm run node_3 && npm run node_4 && npm run node_5"
   },
   "repository": {
     "type": "git",
